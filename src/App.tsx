@@ -8,7 +8,6 @@ import Chart from "./routes/Chart";
 import { ReactQueryDevtools } from "react-query/devtools";
 import styled, { ThemeProvider } from "styled-components";
 import { darkTheme, lightTheme } from "./theme";
-
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { isDarkAtom } from "./atome";
 
@@ -58,8 +57,6 @@ const ModeBtn = styled.svg`
 `;
 
 function App() {
-  // const [isDark, setDark] = useState(false);
-  // const toggleBtn = () => setDark((current) => !current);
   const isDark = useRecoilValue(isDarkAtom);
   const setDarkAtom = useSetRecoilState(isDarkAtom);
   const toggleDarkAtom = () => setDarkAtom((prev) => !prev);

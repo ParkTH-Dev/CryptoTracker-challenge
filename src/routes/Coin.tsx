@@ -4,83 +4,147 @@ import { Link } from "react-router-dom";
 import { Outlet, useLocation, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { fetchCoinInfo, fetchCoinPrice } from "./api";
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 
 const Container = styled.div`
-  padding: 0 50px;
-  max-width: 600px;
-  min-width: 320px;
+  padding: 20px;
+  max-width: 800px;
   margin: 0 auto;
 `;
 
 const Header = styled.header`
-  height: 8vh;
-  display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
-  justify-items: center;
-  align-items: center;
+  position: relative;
+  padding: 30px 0;
+  text-align: center;
+  margin-bottom: 40px;
+  &:hover button {
+    transform: translateX(-5px);
+  }
+`;
+
+const BackButton = styled(Link)`
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 24px;
+  color: ${(props) => props.theme.accentColor};
+  transition: all 0.2s ease-in-out;
+  opacity: 0.8;
+
+  &:hover {
+    opacity: 1;
+  }
 `;
 
 const Title = styled.h1`
+  font-size: 2.5rem;
   font-weight: 700;
-  font-size: 45px;
   color: ${(props) => props.theme.accentColor};
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 `;
 
-const HomeBtn = styled.div`
-  font-size: 40px;
-  color: ${(props) => props.theme.accentColor};
+const LoadingWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
 `;
 
 const Loading = styled.div`
-  text-align: center;
-  font-size: 25px;
+  font-size: 1.5rem;
+  color: ${(props) => props.theme.textColor};
+  opacity: 0.8;
 `;
 
-const OverView = styled.div`
-  display: flex;
-  justify-content: space-between;
-  background-color: ${(props) => props.theme.itemColor};
-  padding: 10px 20px;
-  border-radius: 15px;
+const Overview = styled.div`
+  background: ${(props) => props.theme.itemColor};
+  border-radius: 20px;
+  padding: 25px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  transition: all 0.3s ease-in-out;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+  }
 `;
 
-const OverViewItem = styled.div`
-  padding: 10px;
-  gap: 10px;
+const OverviewItem = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-size: 22px;
-  span:first-child {
+  text-align: center;
+  padding: 15px;
+  border-radius: 15px;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .label {
+    font-size: 0.9rem;
     font-weight: 600;
-    font-size: 13px;
     text-transform: uppercase;
     color: ${(props) => props.theme.accentColor};
+    margin-bottom: 10px;
+  }
+
+  .value {
+    font-size: 1.3rem;
+    font-weight: 600;
   }
 `;
 
 const Description = styled.p`
-  margin: 25px 0;
+  line-height: 1.6;
   color: ${(props) => props.theme.textColor};
-  font-size: 20px;
+  font-size: 1rem;
+  margin: 30px 0;
+  padding: 25px;
+  background: ${(props) => props.theme.itemColor};
+  border-radius: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+  }
 `;
 
-const Taps = styled.div`
+const Tabs = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  margin: 30px 0;
-  gap: 10px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin: 40px 0;
 `;
-const Tap = styled.span<{ isactive: boolean }>`
-  text-align: center;
-  background-color: ${(props) => props.theme.itemColor};
+
+const Tab = styled.div<{ $isActive: boolean }>`
+  background: ${(props) => props.theme.itemColor};
   border-radius: 15px;
-  color: ${(props) =>
-    props.isactive ? props.theme.accentColor : props.theme.textColor};
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+  }
+
   a {
     display: block;
-    padding: 10px;
+    padding: 20px;
+    text-align: center;
+    color: ${(props) =>
+      props.$isActive ? props.theme.accentColor : props.theme.textColor};
+    font-weight: ${(props) => (props.$isActive ? "600" : "400")};
+    font-size: 1.1rem;
   }
 `;
 
@@ -162,72 +226,75 @@ export default function Coin() {
   );
   const loading = infoLoading || priceLoading;
 
-  // const [info, setInfo] = useState<IInfoData>();
-  // const [price, setPrice] = useState<IPriceData>();
-  // const [isLoading, setLoading] = useState(true);
-  // useEffect(() => {
-  //   (async () => {
-  //     const infoData = await (
-  //       await fetch(`https://api.coinpaprika.com/v1/coins/${coinId}`)
-  //     ).json();
-  //     const priceData = await (
-  //       await fetch(`https://api.coinpaprika.com/v1/tickers/${coinId}`)
-  //     ).json();
-  //     setInfo(infoData);
-  //     setPrice(priceData);
-  //     setLoading(false);
-  //   })();
-  // }, []);
   return (
     <Container>
       <Helmet>
-        <title>{infoData?.name}</title>
+        <title>
+          {state?.name ? state.name : loading ? "Loading..." : infoData?.name}
+        </title>
       </Helmet>
+
       <Header>
-        <HomeBtn>
-          <Link to={"/"}>←</Link>
-        </HomeBtn>
+        <BackButton to="/">←</BackButton>
         <Title>
           {state?.name ? state.name : loading ? "Loading..." : infoData?.name}
         </Title>
       </Header>
+
       {loading ? (
-        <Loading>Loading...</Loading>
+        <LoadingWrapper>
+          <Loading>Loading data...</Loading>
+        </LoadingWrapper>
       ) : (
         <>
-          <OverView>
-            <OverViewItem>
-              <span>Rank:</span>
-              <span>{infoData?.rank}</span>
-            </OverViewItem>
-            <OverViewItem>
-              <span>Symbol:</span>
-              <span>{infoData?.symbol}</span>
-            </OverViewItem>
-            <OverViewItem>
-              <span>price:</span>
-              <span>${priceData?.quotes?.USD?.price.toFixed(3)}</span>
-            </OverViewItem>
-          </OverView>
+          <Overview>
+            <OverviewItem>
+              <span className="label">Rank</span>
+              <span className="value">#{infoData?.rank}</span>
+            </OverviewItem>
+            <OverviewItem>
+              <span className="label">Symbol</span>
+              <span className="value">{infoData?.symbol}</span>
+            </OverviewItem>
+            <OverviewItem>
+              <span className="label">Price</span>
+              <span className="value">
+                ${priceData?.quotes?.USD?.price.toFixed(2)}
+              </span>
+            </OverviewItem>
+          </Overview>
+
           <Description>{infoData?.description}</Description>
-          <OverView>
-            <OverViewItem>
-              <span>Total Suply:</span>
-              <span>{priceData?.total_supply}</span>
-            </OverViewItem>
-            <OverViewItem>
-              <span>Max Supply:</span>
-              <span>{priceData?.max_supply}</span>
-            </OverViewItem>
-          </OverView>
-          <Taps>
-            <Tap isactive={priceMatch !== null}>
-              <Link to={"price"}>Price</Link>
-            </Tap>
-            <Tap isactive={chartMatch !== null}>
-              <Link to={"chart"}>Chart</Link>
-            </Tap>
-          </Taps>
+
+          <Overview>
+            <OverviewItem>
+              <span className="label">Total Supply</span>
+              <span className="value">
+                {priceData?.total_supply?.toLocaleString() ?? "N/A"}
+              </span>
+            </OverviewItem>
+            <OverviewItem>
+              <span className="label">Max Supply</span>
+              <span className="value">
+                {priceData?.max_supply?.toLocaleString() ?? "N/A"}
+              </span>
+            </OverviewItem>
+            <OverviewItem>
+              <span className="label">Market Cap</span>
+              <span className="value">
+                ${priceData?.quotes?.USD?.market_cap?.toLocaleString() ?? "N/A"}
+              </span>
+            </OverviewItem>
+          </Overview>
+
+          <Tabs>
+            <Tab $isActive={priceMatch !== null}>
+              <Link to="price">Price</Link>
+            </Tab>
+            <Tab $isActive={chartMatch !== null}>
+              <Link to="chart">Chart</Link>
+            </Tab>
+          </Tabs>
           <Outlet />
         </>
       )}

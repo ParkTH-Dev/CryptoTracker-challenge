@@ -19,9 +19,17 @@ export async function fetchCoinPrice(coinId: string | undefined) {
 }
 
 export async function fetchCoinHistory(coinId: string | undefined) {
-  const response = await fetch(
-    `https://ohlcv-api.nomadcoders.workers.dev?coinId=${coinId}`
-  );
-  const json = await response.json();
-  return json;
+  try {
+    const response = await fetch(
+      `https://ohlcv-api.nomadcoders.workers.dev?coinId=${coinId}`
+    );
+    const json = await response.json();
+    if ("error" in json || json.length === 0) {
+      return null;
+    }
+    return json;
+  } catch (error) {
+    console.error("Failed to fetch coin history:", error);
+    return null;
+  }
 }

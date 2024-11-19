@@ -37,24 +37,57 @@ interface IPriceData {
   };
 }
 
-const Wrapper = styled.div``;
+const Container = styled.div`
+  padding: 20px;
+`;
 
-const OverView = styled.div`
-  display: flex;
-  gap: 10px;
-  flex-direction: column;
+const PriceCard = styled.div`
   background-color: ${(props) => props.theme.itemColor};
-  padding: 30px;
-  border-radius: 15px;
-  margin: 30px 0;
-  h1 {
-    font-size: 30px;
-    color: ${(props) => props.theme.accentColor};
+  border-radius: 20px;
+  padding: 25px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
   }
 `;
 
-const OverViewItem = styled.div`
-  font-size: 30px;
+const PriceTitle = styled.h2`
+  font-size: 1.2rem;
+  color: ${(props) => props.theme.accentColor};
+  margin-bottom: 15px;
+`;
+
+const PriceValue = styled.div`
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${(props) => props.theme.textColor};
+  margin: 10px 0;
+`;
+
+const PriceInfo = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 20px;
+  font-size: 1.1rem;
+  color: ${(props) => props.theme.textColor};
+  text-align: center;
+
+  div {
+    padding: 15px;
+    background-color: ${(props) => props.theme.bgColor};
+    border-radius: 15px;
+    transition: all 0.2s ease-in-out;
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+  }
 `;
 
 export default function Price() {
@@ -68,20 +101,25 @@ export default function Price() {
         {isLoading ? (
           "Loading Price..."
         ) : (
-          <Wrapper>
-            <OverView>
-              <h1>{data?.name} 현재가</h1>
-              <OverViewItem>
-                :${data?.quotes?.USD?.price.toFixed(2)}
-              </OverViewItem>
-            </OverView>
-            <OverView>
-              <h1>{data?.name} 역대 최고가</h1>
-              <OverViewItem>
-                :${data?.quotes?.USD?.ath_price.toFixed(2)}
-              </OverViewItem>
-            </OverView>
-          </Wrapper>
+          <Container>
+            <PriceCard>
+              <PriceTitle>{data?.name} 현재가</PriceTitle>
+              <PriceValue>:${data?.quotes?.USD?.price.toFixed(2)}</PriceValue>
+              <PriceInfo>
+                <div>
+                  역대 최고가: ${data?.quotes?.USD?.ath_price.toFixed(2)}
+                </div>
+                <div>
+                  시가총액: ${data?.quotes?.USD?.market_cap.toLocaleString()}{" "}
+                  USD
+                </div>
+                <div>
+                  24시간 거래량: $
+                  {data?.quotes?.USD?.volume_24h.toLocaleString()} USD
+                </div>
+              </PriceInfo>
+            </PriceCard>
+          </Container>
         )}
       </div>
     </>
