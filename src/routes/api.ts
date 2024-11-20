@@ -23,8 +23,11 @@ export async function fetchCoinHistory(coinId: string | undefined) {
     const response = await fetch(
       `https://ohlcv-api.nomadcoders.workers.dev?coinId=${coinId}`
     );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
     const json = await response.json();
-    if ("error" in json || json.length === 0) {
+    if (!json || "error" in json || json.length === 0) {
       return null;
     }
     return json;

@@ -33,8 +33,13 @@ interface IHistorical {
 
 export default function Chart() {
   const { coinId } = useParams();
-  const { isLoading, data } = useQuery<IHistorical[]>(["ohlcv", coinId], () =>
-    fetchCoinHistory(coinId)
+  const { isLoading, data, isError } = useQuery<IHistorical[]>(
+    ["ohlcv", coinId],
+    () => fetchCoinHistory(coinId),
+    {
+      retry: false,
+      refetchOnWindowFocus: false,
+    }
   );
   const isDark = useRecoilValue(isDarkAtom);
 
@@ -42,7 +47,9 @@ export default function Chart() {
     <ChartContainer>
       {isLoading ? (
         <LoadingMessage>차트를 불러오는 중입니다...</LoadingMessage>
-      ) : !data || data.length === 0 ? (
+      ) : isError || !data ? (
+        <LoadingMessage>차트 데이터를 불러올 수 없습니다.</LoadingMessage>
+      ) : data.length === 0 ? (
         <LoadingMessage>차트 데이터가 존재하지 않습니다.</LoadingMessage>
       ) : (
         <ApexChart
